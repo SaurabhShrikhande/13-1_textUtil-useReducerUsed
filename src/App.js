@@ -2,19 +2,34 @@ import './App.css';
 import { useState, useEffect, useReducer } from 'react';
 
 function App() {
-    const [text , settext] = useState("");
     function changetextt(initstate, action){
         switch(action.type){
           case "change" : 
-          return {...initstate , value: action.paylode };
+           return { ...initstate , value: action.paylode};
+            // if(initstate.value === "") return { ...initstate , value: action.paylode , words : 0 };
+          case 'upper' :
+               return  { ...initstate , value : initstate.value.toUpperCase()};
+           case 'lower' :
+              return { ...initstate , value : initstate.value.toLowerCase()};
+           case 'clear' :
+               return { ...initstate , value : '' };
+           case 'copy' :
+            navigator.clipboard.writeText(initstate.value)
+            .then(() => alert("text copied"))
+            .catch (() => alert("text copied failed"));
+             return {...initstate};
+          case 'trim' :
+           const sent = initstate.value.trim();
+           const wo = sent.split(/\s+/);
+            const join = wo.join(" ");
+            return  { ...initstate , value: join};
           default :
           return { ...initstate };
         }
     }
-    const [textt , dispatch] = useReducer(changetextt, '');
-   const [char , setchar] = useState(0);
+    const [textt , dispatch] = useReducer(changetextt, { value : ''});
+
    const [word , setword] = useState(0);
-   const [readingtime , setrt] = useState(0);
    const [dark , setdark] = useState(false); 
  const [dtheme, setdtheme] = useState({
       backgroundColor : "black",
@@ -62,48 +77,15 @@ function App() {
              }
    }, [dark])
 
-    function funall (e){
-        settext(e.target.value);
-    }
-  
-    function btn (parameter){
-     if (parameter === "upper" ){
-        settext(text.toUpperCase());
-     }
-     else if(parameter === "lower"){
-      settext(text.toLowerCase());
-     }
-     else if(parameter === "clear"){
-        settext("");
-     }
-     else if(parameter === "copy"){
-         navigator.clipboard.writeText(text)
-         .then(() => alert("text copied"))
-         .catch (() => alert("text copied failed"));
-         ;
-     }
-     else if(parameter === "trim"){
-      let sentence = text.trim();
-      const wor = sentence.split(/\s+/);
-      const join = wor.join(" ");
-        
-          settext(join);
-     }
-
-    }
 
     useEffect(()=> {
-      let sentence = text.trim();
+      let sentence = textt.value.trim();
      const wor = sentence.split(/\s+/);
         console.log(sentence);
         console.log(wor);
-       if(text !== "") setword(wor.length);
-       if(text === "") setword(0);
-        setchar(text.length);
-        if(text !== "") setrt(wor.length * 0.008);
-        if(text === "") setrt(0);
- 
-    }, [text])
+       if(textt.value !== "") setword(wor.length);
+       if(textt.value === "") setword(0);
+    }, [textt.value])
 
 
   return (
@@ -132,19 +114,19 @@ function App() {
          <h2>Enter Your Text Here:</h2>
          <textarea rows="12" cols="70" value={textt.value} className='textarea'
          onChange={(e) => {dispatch({type:"change" , paylode: e.target.value})}}></textarea> <br></br>
-         <button className='btn bgblue' onClick={() => btn("upper")}>Convert Uppercase</button>
-         <button className='btn bgblue' onClick={() => btn("lower")}>Convert Lowercase</button>
-         <button className='btn bgred'  onClick={() => btn("clear")}>Clear Text</button>
-         <button className='btn bggreen' onClick={() => btn("copy")}>Copy To Clipboart</button>
-         <button className='btn bgblue'  onClick={() => btn("trim")}>Remove Extra Spaces</button>
+         <button className='btn bgblue' onClick={() =>  dispatch({type:"upper"}) /* btn("upper") */ }>Convert Uppercase</button>
+         <button className='btn bgblue' onClick={() => dispatch({type:"lower"}) /* btn("lower")  */ }>Convert Lowercase</button>
+         <button className='btn bgred'  onClick={() =>  dispatch({type:"clear"}) /* btn("clear") */}>Clear Text</button>
+         <button className='btn bggreen' onClick={() =>  dispatch({type:"copy"}) /* btn("copy")  */ }>Copy To Clipboart</button>
+         <button className='btn bgblue'  onClick={() => dispatch({type:"trim"}) /* btn("trim") */}>Remove Extra Spaces</button>
 
          <h1>Summery Of Your Text</h1>
          <h3>Number of words : {word}</h3>
-         <h3>Number of charecters : {char}</h3>
-         <h3>Reading Time : {readingtime}</h3>
+         <h3>Number of charecters : {textt.value.length}</h3>
+         <h3>Reading Time : {word * 0.008}</h3>
 
          <h2>Preview Document</h2>
-         <textarea rows="6" cols="70" className='textarea' value={text}></textarea>
+         <textarea rows="6" cols="70" className='textarea' value={textt.value}></textarea>
       </div>
 
     </div>
